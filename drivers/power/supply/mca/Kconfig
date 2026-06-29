@@ -1,0 +1,65 @@
+# SPDX-License-Identifier: GPL-2.0-only
+
+menu "Xiaomi MCA power supply"
+
+config MCA_PROTOCOL_PD
+	tristate "Xiaomi MCA PD protocol"
+	default n
+
+config MCA_PROTOCOL_QC
+	tristate "Xiaomi MCA QC protocol"
+	default n
+
+config MCA_EXTERNAL_FG
+	tristate "Xiaomi MCA external fuel gauge"
+	default n
+
+config MCA_EXTERNAL_CP
+	tristate "Xiaomi MCA external charge pump"
+	default n
+
+config MCA_EXTERNAL_WIRELESS
+	tristate "Xiaomi MCA external wireless"
+	default n
+
+config MCA_QCOM_SUBPMIC
+	tristate "Xiaomi MCA QCOM subpmic"
+	default n
+
+config MCA_QCOM_ADSP
+	tristate "Xiaomi MCA QCOM ADSP"
+	default n
+
+config MCA_QCOM_SYSFS
+	tristate "Xiaomi MCA QCOM sysfs"
+	default n
+
+config MCA_QCOM_SMEM
+	tristate "Xiaomi MCA QCOM smem"
+	default n
+
+config MCA_QCOM_PANEL
+	tristate "Xiaomi MCA QCOM panel"
+	default n
+
+config MCA_EXTERNAL_BOOST
+	tristate "Xiaomi MCA external boost"
+	default n
+
+config MCA_EXTERNAL_LOADSWITCH
+	tristate "Xiaomi MCA external loadswitch"
+	default n
+
+config MCA_EXTERNAL_CP_SC8541
+	tristate "Xiaomi MCA SC8541 charge pump"
+	default n
+
+config MCA_EXTERNAL_WIRELESS_SC96281
+	tristate "Xiaomi MCA SC96281 wireless"
+	default n
+
+config MCA_UT_TEST
+	tristate "Xiaomi MCA unit test"
+	default n
+
+endmenu

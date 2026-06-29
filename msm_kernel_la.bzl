@@ -290,7 +290,6 @@ def _define_image_build(
         vendor_dlkm_modules_blocklist = ":{}".format(modules_list_name["modules.vendor_blocklist.msm"]),
         dtbo_srcs = [":{}/".format(target) + d for d in dtbo_list] if dtbo_list else None,
         vendor_ramdisk_binaries = vendor_ramdisk_binaries,
-        gki_ramdisk_prebuilt_binary = gki_ramdisk_prebuilt_binary,
         boot_image_outs = boot_image_outs,
         system_dlkm_fs_types = ["ext4"],
         deps = [
@@ -528,7 +527,6 @@ def define_msm_la(
         build_vendor_boot = True if dtbo_list else False,
         dtbo_list = dtbo_list,
         vendor_ramdisk_binaries = vendor_ramdisk_binaries,
-        gki_ramdisk_prebuilt_binary = gki_ramdisk_prebuilt_binary,
         boot_image_opts = boot_image_opts,
         boot_image_outs = None if dtb_list else ["boot.img", "init_boot.img"],
         in_tree_module_list = in_tree_module_list,
