@@ -233,12 +233,7 @@ static int z_erofs_bvec_enqueue(struct z_erofs_bvec_iter *iter,
 		struct page *nextpage = *candidate_bvpage;
 
 		if (!nextpage) {
-<<<<<<< ours
 			nextpage = erofs_allocpage(pagepool, GFP_KERNEL);
-=======
-			nextpage = __erofs_allocpage(pagepool, GFP_KERNEL,
-					true);
->>>>>>> theirs
 			if (!nextpage)
 				return -ENOMEM;
 			set_page_private(nextpage, Z_EROFS_SHORTLIVED_PAGE);

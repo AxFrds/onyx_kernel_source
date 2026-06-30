@@ -1959,30 +1959,19 @@ static int qcom_glink_request_intent(struct qcom_glink *glink,
 		goto unlock;
 
 	ret = wait_event_timeout(channel->intent_req_wq,
-<<<<<<< ours
 				 (READ_ONCE(channel->intent_req_result) >= 0 &&
 				 READ_ONCE(channel->intent_received)) ||
-=======
-				 READ_ONCE(channel->intent_req_result) == 0 ||
-				 (READ_ONCE(channel->intent_req_result) > 0 &&
-				  READ_ONCE(channel->intent_received)) ||
->>>>>>> theirs
 				 glink->abort_tx,
 				 10 * HZ);
 	if (!ret) {
 		dev_err(glink->dev, "%s: intent request ack timed out (%d)\n",
 			channel->name, channel->intent_timeout_count);
 		ret = -ETIMEDOUT;
-<<<<<<< ours
 		channel->intent_timeout_count++;
 		if (channel->intent_timeout_count >= MAX_INTENT_TIMEOUTS)
 			GLINK_BUG(glink->ilc,
 				"remoteproc:%s channel:%s unresponsive\n",
 				glink->name, channel->name);
-=======
-	} else if (glink->abort_tx) {
-		ret = -ECANCELED;
->>>>>>> theirs
 	} else {
 		ret = READ_ONCE(channel->intent_req_result) ? 0 : -EAGAIN;
 	}

@@ -2355,10 +2355,6 @@ static int scmi_chan_setup(struct scmi_info *info, struct device_node *of_node,
 	if (!cinfo)
 		return -ENOMEM;
 
-<<<<<<< ours
-=======
-	cinfo->is_p2a = !tx;
->>>>>>> theirs
 	cinfo->rx_timeout_ms = info->max_rx_timeout_ms;
 
 	/* Create a unique name for this transport device */

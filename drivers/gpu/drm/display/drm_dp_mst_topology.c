@@ -4082,13 +4082,7 @@ static int drm_dp_mst_handle_up_req(struct drm_dp_mst_topology_mgr *mgr)
 			    conn_stat->input_port,
 			    conn_stat->peer_device_type);
 
-<<<<<<< ours
 		handle_csn = mgr->mst_primary->link_address_sent;
-=======
-		mutex_lock(&mgr->probe_lock);
-		handle_csn = mst_primary->link_address_sent;
-		mutex_unlock(&mgr->probe_lock);
->>>>>>> theirs
 
 		if (!handle_csn) {
 			drm_dbg_kms(mgr->dev, "Got CSN before finish topology probing. Skip it.");

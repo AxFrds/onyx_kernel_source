@@ -342,13 +342,24 @@ static struct zram_pp_slot *select_pp_slot(struct zram_pp_ctl *ctl)
 }
 #endif
 
+#ifdef CONFIG_MIUI_ZRAM_MEMORY_TRACKING
+static void zram_record_page_life(struct zram *zram, u32 index);
+#endif
+
 static void zram_accessed(struct zram *zram, u32 index)
 {
 	zram_clear_flag(zram, index, ZRAM_IDLE);
-#ifdef CONFIG_ZRAM_TRACK_ENTRY_ACTIME
+#ifdef CONFIG_MIUI_ZRAM_MEMORY_TRACKING
+	zram_clear_idle_count(zram, index);
+#endif
+#if defined(CONFIG_ZRAM_TRACK_ENTRY_ACTIME) || defined(CONFIG_MIUI_ZRAM_MEMORY_TRACKING)
+#ifdef CONFIG_MIUI_ZRAM_MEMORY_TRACKING
+	zram_record_page_life(zram, index);
+#endif
 	zram->table[index].ac_time = ktime_get_boottime();
 #endif
 }
+
 
 static inline void update_used_max(struct zram *zram,
 					const unsigned long pages)
@@ -472,7 +483,6 @@ static void mark_idle(struct zram *zram)
 		 * And ZRAM_WB slots simply cannot be ZRAM_IDLE.
 		 */
 		zram_slot_lock(zram, index);
-<<<<<<< ours
 		if (zram_get_obj_size(zram, index) &&
 					zram_test_flag(zram, index, ZRAM_COMPRESS_LOW) &&
 					!zram_test_flag(zram, index, ZRAM_UNDER_WB) &&
@@ -485,24 +495,8 @@ static void mark_idle(struct zram *zram)
 					zram_set_flag(zram, index, ZRAM_IDLE);
 					mark_nr++;
 				}
-=======
-		if (!zram_allocated(zram, index) ||
-		    zram_test_flag(zram, index, ZRAM_WB) ||
-		    zram_test_flag(zram, index, ZRAM_UNDER_WB) ||
-		    zram_test_flag(zram, index, ZRAM_SAME)) {
-			zram_slot_unlock(zram, index);
-			continue;
->>>>>>> theirs
 		}
 
-#ifdef CONFIG_ZRAM_TRACK_ENTRY_ACTIME
-		is_idle = !cutoff ||
-			ktime_after(cutoff, zram->table[index].ac_time);
-#endif
-		if (is_idle)
-			zram_set_flag(zram, index, ZRAM_IDLE);
-		else
-			zram_clear_flag(zram, index, ZRAM_IDLE);
 		zram_slot_unlock(zram, index);
 	}
 	pr_info("Mark IDLE finished. Mark %d pages\n", mark_nr);
@@ -520,17 +514,7 @@ static ssize_t idle_store(struct device *dev,
 		 * If it did not parse as 'all' try to treat it as an integer
 		 * when we have memory tracking enabled.
 		 */
-<<<<<<< ours
 		goto out;
-=======
-		u64 age_sec;
-
-		if (IS_ENABLED(CONFIG_ZRAM_TRACK_ENTRY_ACTIME) && !kstrtoull(buf, 0, &age_sec))
-			cutoff_time = ktime_sub(ktime_get_boottime(),
-					ns_to_ktime(age_sec * NSEC_PER_SEC));
-		else
-			goto out;
->>>>>>> theirs
 	}
 
 	down_read(&zram->init_lock);
@@ -654,7 +638,7 @@ static ssize_t mfz_disk_quota_show(struct device *dev,
 #endif
 
 #ifdef CONFIG_ZRAM_WRITEBACK
-static ssize_t low_compress_ratio_store(struct device *dev,
+static __maybe_unused ssize_t low_compress_ratio_store(struct device *dev,
 					struct device_attribute *attr,
 					const char *buf, size_t len)
 {
@@ -675,7 +659,7 @@ static ssize_t low_compress_ratio_store(struct device *dev,
 	return ret;
 }
 
-static ssize_t low_compress_ratio_show(struct device *dev,
+static __maybe_unused ssize_t low_compress_ratio_show(struct device *dev,
 				       struct device_attribute *attr, char *buf)
 {
 	return scnprintf(buf, PAGE_SIZE, "%u\n", glow_compress_ratio);
@@ -1602,19 +1586,8 @@ static void zram_debugfs_destroy(void)
 	debugfs_remove_recursive(zram_debugfs_root);
 }
 
-<<<<<<< ours
-static void zram_accessed(struct zram *zram, u32 index)
-{
-	zram_clear_flag(zram, index, ZRAM_IDLE);
-	zram_clear_idle_count(zram, index);
-#ifdef CONFIG_MIUI_ZRAM_MEMORY_TRACKING
-	zram_record_page_life(zram, index);
-#endif
-	zram->table[index].ac_time = ktime_get_boottime();
-}
 
-=======
->>>>>>> theirs
+
 static ssize_t read_block_state(struct file *file, char __user *buf,
 				size_t count, loff_t *ppos)
 {
@@ -1698,18 +1671,7 @@ static void zram_debugfs_unregister(struct zram *zram)
 #else
 static void zram_debugfs_create(void) {};
 static void zram_debugfs_destroy(void) {};
-<<<<<<< ours
-static void zram_accessed(struct zram *zram, u32 index)
-{
-	zram_clear_flag(zram, index, ZRAM_IDLE);
-	zram_clear_idle_count(zram, index);
-#ifdef CONFIG_MIUI_ZRAM_MEMORY_TRACKING
-	zram_record_page_life(zram, index);
-	zram->table[index].ac_time = ktime_get_boottime();
-#endif
-};
-=======
->>>>>>> theirs
+
 static void zram_debugfs_register(struct zram *zram) {};
 static void zram_debugfs_unregister(struct zram *zram) {};
 #endif

@@ -1479,11 +1479,7 @@ fast_isolate_around(struct compact_control *cc, unsigned long pfn)
 	if (!page)
 		return;
 
-<<<<<<< ours
 	trace_android_vh_suitable_migration_target_bypass(page, &bypass);
-=======
-	trace_android_vh_migration_target_bypass(page, &bypass);
->>>>>>> theirs
 	if (bypass)
 		return;
 

@@ -289,26 +289,6 @@
     },
     {
       "name": "vts_kernel_net_tests"
-<<<<<<< ours
-=======
-    },
-    {
-      "name": "binderLibTest"
-    },
-    {
-      "name": "CtsLibcoreTestCases"
-    },
-    {
-      "name": "CtsUsbTests"
-    },
-    {
-      "name": "CtsDrmTestCases",
-      "options": [
-        {
-          "exclude-filter": "android.drm.cts.DRMTest#testForwardLockAccess"
-        }
-      ]
->>>>>>> theirs
     }
   ]
 }

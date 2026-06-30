@@ -467,13 +467,9 @@ static void qcom_lmh_dcvs_notify(struct qcom_cpufreq_data *data)
 	 * If h/w throttled frequency is higher than what cpufreq has requested
 	 * for, then stop polling and switch back to interrupt mechanism.
 	 */
-<<<<<<< ours
 	if (throttled_freq >= qcom_cpufreq_get_freq(cpu)) {
 		thermal_pressure = policy->cpuinfo.max_freq;
 
-=======
-	if (throttled_freq >= qcom_cpufreq_get_freq(cpufreq_cpu_get_raw(cpu)))
->>>>>>> theirs
 		enable_irq(data->throttle_irq);
 		trace_dcvsh_throttle(cpu, 0);
 	} else {
@@ -846,34 +842,7 @@ static struct cpufreq_driver cpufreq_qcom_hw_driver = {
 	.name		= "qcom-cpufreq-hw",
 	.attr		= qcom_cpufreq_hw_attr,
 	.ready		= qcom_cpufreq_ready,
-<<<<<<< ours
 	.boost_enabled	= true,
-=======
-};
-
-static unsigned long qcom_cpufreq_hw_recalc_rate(struct clk_hw *hw, unsigned long parent_rate)
-{
-	struct qcom_cpufreq_data *data = container_of(hw, struct qcom_cpufreq_data, cpu_clk);
-
-	return __qcom_cpufreq_hw_get(data->policy) * HZ_PER_KHZ;
-}
-
-/*
- * Since we cannot determine the closest rate of the target rate, let's just
- * return the actual rate at which the clock is running at. This is needed to
- * make clk_set_rate() API work properly.
- */
-static int qcom_cpufreq_hw_determine_rate(struct clk_hw *hw, struct clk_rate_request *req)
-{
-	req->rate = qcom_cpufreq_hw_recalc_rate(hw, 0);
-
-	return 0;
-}
-
-static const struct clk_ops qcom_cpufreq_hw_clk_ops = {
-	.recalc_rate = qcom_cpufreq_hw_recalc_rate,
-	.determine_rate = qcom_cpufreq_hw_determine_rate,
->>>>>>> theirs
 };
 
 static int qcom_cpufreq_hw_driver_probe(struct platform_device *pdev)

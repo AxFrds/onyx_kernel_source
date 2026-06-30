@@ -223,7 +223,6 @@ static int __init set_ftrace_dump_on_oops(char *str)
 {
 	if (!*str) {
 		strscpy(ftrace_dump_on_oops, "1", MAX_TRACER_SIZE);
-<<<<<<< ours
 		return 1;
 	}
 
@@ -233,17 +232,6 @@ static int __init set_ftrace_dump_on_oops(char *str)
 		return 1;
 	}
 
-=======
-		return 1;
-	}
-
-	if (*str == ',') {
-		strscpy(ftrace_dump_on_oops, "1", MAX_TRACER_SIZE);
-		strscpy(ftrace_dump_on_oops + 1, str, MAX_TRACER_SIZE - 1);
-		return 1;
-	}
-
->>>>>>> theirs
 	if (*str++ == '=') {
 		strscpy(ftrace_dump_on_oops, str, MAX_TRACER_SIZE);
 		return 1;

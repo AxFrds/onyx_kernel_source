@@ -67,10 +67,6 @@
   bio_init
   bio_put
   bio_start_io_acct
-<<<<<<< ours
-=======
-  bitmap_allocate_region
->>>>>>> theirs
   __bitmap_andnot
   __bitmap_clear
   __bitmap_equal
@@ -88,11 +84,6 @@
   bitmap_to_arr32
   __bitmap_weight
   bitmap_zalloc
-<<<<<<< ours
-=======
-  bit_wait
-  bit_wait_timeout
->>>>>>> theirs
   __blk_alloc_disk
   blk_check_plugged
   blkdev_get_by_dev
@@ -994,11 +985,6 @@
   __fdget
   fd_install
   fget
-<<<<<<< ours
-=======
-  filemap_dirty_folio
-  __filemap_get_folio
->>>>>>> theirs
   file_path
   filp_close
   filp_open_block
@@ -1015,10 +1001,6 @@
   finish_wait
   firmware_kobj
   firmware_request_nowarn
-<<<<<<< ours
-=======
-  flush_dcache_folio
->>>>>>> theirs
   flush_dcache_page
   flush_delayed_work
   flush_work
@@ -2083,10 +2065,6 @@
   regcache_drop_region
   regcache_mark_dirty
   regcache_sync
-<<<<<<< ours
-=======
-  regcache_sync_region
->>>>>>> theirs
   __register_blkdev
   __register_chrdev
   register_chrdev_region
@@ -3101,12 +3079,6 @@
   vmap
   vmf_insert_pfn
   vmf_insert_pfn_prot
-<<<<<<< ours
-=======
-  vm_get_page_prot
-  vm_iomap_memory
-  vm_map_ram
->>>>>>> theirs
   vm_node_stat
   vm_unmapped_area
   vm_unmap_ram

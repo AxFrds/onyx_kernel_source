@@ -21,11 +21,6 @@
 #include "iostat.h"
 #include <trace/events/f2fs.h>
 #include <trace/hooks/fs.h>
-<<<<<<< ours
-=======
-
-EXPORT_TRACEPOINT_SYMBOL_GPL(f2fs_write_checkpoint);
->>>>>>> theirs
 
 #define DEFAULT_CHECKPOINT_IOPRIO (IOPRIO_PRIO_VALUE(IOPRIO_CLASS_BE, 3))
 

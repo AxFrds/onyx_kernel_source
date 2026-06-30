@@ -1205,10 +1205,6 @@ static int smmu_detach_dev(struct kvm_hyp_iommu *iommu, struct kvm_hyp_iommu_dom
 	if (!dst)
 		goto out_unlock;
 
-<<<<<<< ours
-=======
-	ste_cfg = FIELD_GET(STRTAB_STE_0_CFG, dst[0]);
->>>>>>> theirs
 	/*
 	 * Look at smmu_domain_config_s1 for CD allocation and life time
 	 * For detach stage-1 domains:
@@ -1218,13 +1214,6 @@ static int smmu_detach_dev(struct kvm_hyp_iommu *iommu, struct kvm_hyp_iommu_dom
 	 * - PASID_BITS = 0: invalidate the STE, the cdptr per domain would be free at free_domain()
 	 */
 	if (smmu_domain->type == KVM_ARM_SMMU_DOMAIN_S1) {
-<<<<<<< ours
-=======
-		if (ste_cfg != STRTAB_STE_0_CFG_S1_TRANS) {
-			ret = -EACCES;
-			goto out_unlock;
-		}
->>>>>>> theirs
 		pasid_bits = FIELD_GET(STRTAB_STE_0_S1CDMAX, dst[0]);
 		if (pasid >= (1 << pasid_bits)) {
 			ret = -E2BIG;
@@ -1245,31 +1234,8 @@ static int smmu_detach_dev(struct kvm_hyp_iommu *iommu, struct kvm_hyp_iommu_dom
 						goto out_unlock;
 					}
 				}
-<<<<<<< ours
 			} else {
 				cd = smmu_get_cd_ptr(cd_table, pasid);
-=======
-				cd = smmu_get_cd_ptr(cd_table, 0);
-				domain_id = FIELD_GET(CTXDESC_CD_0_ASID, cd[0]);
-				if (domain->domain_id != domain_id) {
-					ret = -EACCES;
-					goto out_unlock;
-				}
-			} else {
-				cd = smmu_get_cd_ptr(cd_table, pasid);
-				if (!(cd[0] & CTXDESC_CD_0_V)) {
-					/* The device is not actually attached! */
-					ret = -ENOENT;
-					goto out_unlock;
-				}
-
-				domain_id = FIELD_GET(CTXDESC_CD_0_ASID, cd[0]);
-				if (domain->domain_id != domain_id) {
-					ret = -EACCES;
-					goto out_unlock;
-				}
-
->>>>>>> theirs
 				cd[0] = 0;
 				smmu_sync_cd(smmu, cd, sid, pasid);
 				cd[1] = 0;
@@ -1279,40 +1245,17 @@ static int smmu_detach_dev(struct kvm_hyp_iommu *iommu, struct kvm_hyp_iommu_dom
 				goto out_skip_ste;
 			}
 		}
-<<<<<<< ours
 	}
 	/* For stage-2 and pasid = 0 */
-=======
-	} else {
-		domain_id = FIELD_GET(STRTAB_STE_2_S2VMID, dst[2]);
-		if ((ste_cfg != STRTAB_STE_0_CFG_S2_TRANS) ||
-		    (domain->domain_id != domain_id)) {
-			ret = -EACCES;
-			goto out_unlock;
-		}
-	}
-	/* For stage-2 and pasid = 0 */
-	if (!(dst[0] & STRTAB_STE_0_V)) {
-		/* The device is not actually attached! */
-		ret = -ENOENT;
-		goto out_unlock;
-	}
->>>>>>> theirs
 	dst[0] = 0;
 	ret = smmu_sync_ste(smmu, dst, sid);
 	if (ret)
 		goto out_unlock;
 	for (i = 1; i < STRTAB_STE_DWORDS; i++)
 		dst[i] = 0;
-<<<<<<< ours
 
 	ret = smmu_sync_ste(smmu, dst, sid);
 
-=======
-
-	ret = smmu_sync_ste(smmu, dst, sid);
-
->>>>>>> theirs
 	/* CD table is per SID and not domain for device with PASID. */
 	if (pasid_bits)
 		smmu_free_cd(cd_table, pasid_bits);
@@ -1551,16 +1494,6 @@ static size_t smmu_pgsize_idmap(size_t size, u64 paddr)
 	size_t pgsizes;
 	size_t pgsize_bitmask;
 
-<<<<<<< ours
-=======
-	if (PAGE_SIZE == SZ_4K) {
-		pgsize_bitmask = PAGE_SIZE | (PAGE_SIZE * PTRS_PER_PTE) |
-				 (PAGE_SIZE * PTRS_PER_PTE * PTRS_PER_PTE);
-	} else {
-		pgsize_bitmask = PAGE_SIZE | (PAGE_SIZE * PTRS_PER_PTE);
-	}
-
->>>>>>> theirs
 	/* All page sizes that fit the size */
 	pgsizes = pgsize_bitmask & GENMASK_ULL(__fls(size), 0);
 

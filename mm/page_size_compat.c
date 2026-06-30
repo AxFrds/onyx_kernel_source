@@ -10,10 +10,6 @@
 #include <linux/init.h>
 #include <linux/kstrtox.h>
 #include <linux/mm.h>
-<<<<<<< ours
-=======
-#include <linux/moduleparam.h>
->>>>>>> theirs
 #include <linux/pagemap.h>
 #include <linux/page_size_compat.h>
 #include <linux/swap.h>
@@ -348,10 +344,7 @@ free_magic:
 }
 
 #if IS_ENABLED(CONFIG_PERF_EVENTS)
-<<<<<<< ours
 
-=======
->>>>>>> theirs
 static int __init init_sysctl_perf_event_mlock(void)
 {
 	if (!static_branch_unlikely(&page_shift_compat_enabled))

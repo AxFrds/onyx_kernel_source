@@ -2250,13 +2250,6 @@
   __pskb_pull_tail
   pskb_put
   ___pskb_trim
-<<<<<<< ours
-=======
-  ptp_clock_event
-  ptp_clock_index
-  ptp_clock_register
-  ptp_clock_unregister
->>>>>>> theirs
   ptp_find_pin
   ptp_schedule_worker
   put_cmsg
