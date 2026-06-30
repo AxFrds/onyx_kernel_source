@@ -245,6 +245,22 @@ static unsigned int qcom_cpufreq_get_freq(struct cpufreq_policy *policy)
 	return policy->freq_table[index].frequency;
 }
 
+static unsigned int qcom_cpufreq_get_freq_by_cpu(unsigned int cpu)
+{
+	struct cpufreq_policy *policy;
+	unsigned int freq;
+
+	policy = cpufreq_cpu_get(cpu);
+	if (!policy)
+		return 0;
+
+	freq = qcom_cpufreq_get_freq(policy);
+	cpufreq_cpu_put(policy);
+
+	return freq;
+}
+
+
 static unsigned int __qcom_cpufreq_hw_get(struct cpufreq_policy *policy)
 {
 	struct qcom_cpufreq_data *data;
@@ -467,7 +483,7 @@ static void qcom_lmh_dcvs_notify(struct qcom_cpufreq_data *data)
 	 * If h/w throttled frequency is higher than what cpufreq has requested
 	 * for, then stop polling and switch back to interrupt mechanism.
 	 */
-	if (throttled_freq >= qcom_cpufreq_get_freq(cpu)) {
+	if (throttled_freq >= qcom_cpufreq_get_freq_by_cpu(cpu)) {
 		thermal_pressure = policy->cpuinfo.max_freq;
 
 		enable_irq(data->throttle_irq);
@@ -486,7 +502,7 @@ static void qcom_lmh_dcvs_notify(struct qcom_cpufreq_data *data)
 				 msecs_to_jiffies(10));
 	}
 
-	trace_dcvsh_freq(cpu, qcom_cpufreq_get_freq(cpu), throttled_freq, thermal_pressure);
+	trace_dcvsh_freq(cpu, qcom_cpufreq_get_freq_by_cpu(cpu), throttled_freq, thermal_pressure);
 
 	/* Update thermal pressure (the boost frequencies are accepted) */
 	arch_update_thermal_pressure(policy->related_cpus, thermal_pressure);
