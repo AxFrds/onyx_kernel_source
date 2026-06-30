@@ -96,7 +96,11 @@ struct zram_table_entry {
 		unsigned long element;
 	};
 	unsigned long flags;
+<<<<<<< ours
 #if defined(CONFIG_ZRAM_MEMORY_TRACKING) || defined(CONFIG_MIUI_ZRAM_MEMORY_TRACKING)
+=======
+#ifdef CONFIG_ZRAM_TRACK_ENTRY_ACTIME
+>>>>>>> theirs
 	ktime_t ac_time;
 #endif
 };

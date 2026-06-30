@@ -4106,6 +4106,7 @@ static void sdhci_msm_hw_reset(struct sdhci_host *host)
 	struct platform_device *pdev = msm_host->pdev;
 	int ret = -EOPNOTSUPP;
 
+<<<<<<< ours
 	if (!msm_host->core_reset) {
 		dev_err(&pdev->dev, "%s: failed, err = %d\n", __func__,
 				ret);
@@ -4118,6 +4119,23 @@ static void sdhci_msm_hw_reset(struct sdhci_host *host)
 		host->mmc->cqe_ops->cqe_disable(host->mmc);
 		host->mmc->cqe_enabled = false;
 	}
+=======
+	if (!(cfg->config_enable & CQHCI_CRYPTO_CONFIGURATION_ENABLE))
+		return qcom_ice_evict_key(msm_host->ice, slot);
+
+	/* Only AES-256-XTS has been tested so far. */
+	cap = cq_host->crypto_cap_array[cfg->crypto_cap_idx];
+	if (cap.algorithm_id != CQHCI_CRYPTO_ALG_AES_XTS ||
+		cap.key_size != CQHCI_CRYPTO_KEY_SIZE_256)
+		return -EINVAL;
+
+	return qcom_ice_program_key(msm_host->ice,
+				    QCOM_ICE_CRYPTO_ALG_AES_XTS,
+				    QCOM_ICE_CRYPTO_KEY_SIZE_256,
+				    cfg->crypto_key,
+				    cfg->data_unit_size, slot);
+}
+>>>>>>> theirs
 
 
 	sdhci_msm_gcc_reset(&pdev->dev, host);

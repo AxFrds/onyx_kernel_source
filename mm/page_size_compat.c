@@ -10,6 +10,10 @@
 #include <linux/init.h>
 #include <linux/kstrtox.h>
 #include <linux/mm.h>
+<<<<<<< ours
+=======
+#include <linux/moduleparam.h>
+>>>>>>> theirs
 #include <linux/pagemap.h>
 #include <linux/page_size_compat.h>
 #include <linux/swap.h>
@@ -25,11 +29,15 @@ EXPORT_SYMBOL_GPL(page_shift_compat_enabled);
 int page_shift_compat = MIN_PAGE_SHIFT_COMPAT;
 EXPORT_SYMBOL_GPL(page_shift_compat);
 
-static int __init early_page_shift_compat(char *buf)
+static int __init page_shift_params(char *param, char *val,
+				    const char *unused, void *arg)
 {
 	int ret;
 
-	ret = kstrtoint(buf, 10, &page_shift_compat);
+	if (strcmp(param, "page_shift") != 0)
+		return 0;
+
+	ret = kstrtoint(val, 10, &page_shift_compat);
 	if (ret)
 		return ret;
 
@@ -45,7 +53,27 @@ static int __init early_page_shift_compat(char *buf)
 
 	return 0;
 }
-early_param("page_shift", early_page_shift_compat);
+
+static int __init init_page_shift_compat(void)
+{
+	char *err;
+	char *command_line;
+
+	command_line = kstrdup(saved_command_line, GFP_KERNEL);
+	if (!command_line)
+		return -ENOMEM;
+
+	err = parse_args("page_shift", command_line, NULL, 0, 0, 0, NULL,
+			page_shift_params);
+
+	kfree(command_line);
+
+	if (IS_ERR(err))
+		return -EINVAL;
+
+	return 0;
+}
+pure_initcall(init_page_shift_compat);
 
 static int __init init_mmap_rnd_bits(void)
 {
@@ -320,7 +348,10 @@ free_magic:
 }
 
 #if IS_ENABLED(CONFIG_PERF_EVENTS)
+<<<<<<< ours
 
+=======
+>>>>>>> theirs
 static int __init init_sysctl_perf_event_mlock(void)
 {
 	if (!static_branch_unlikely(&page_shift_compat_enabled))

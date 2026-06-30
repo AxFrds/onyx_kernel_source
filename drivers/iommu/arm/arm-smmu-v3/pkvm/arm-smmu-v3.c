@@ -306,6 +306,9 @@ static int smmu_alloc_l2_strtab(struct hyp_arm_smmu_v3_device *smmu, u32 idx)
 
 	WRITE_ONCE(smmu->strtab_base[idx], l2ptr | span);
 
+	if (!(smmu->features & ARM_SMMU_FEAT_COHERENCY))
+		kvm_flush_dcache_to_poc(&smmu->strtab_base[idx], STRTAB_L1_DESC_DWORDS << 3);
+
 	return 0;
 }
 
@@ -447,6 +450,46 @@ static int smmu_init_cmdq(struct hyp_arm_smmu_v3_device *smmu)
 	return 0;
 }
 
+/*
+ * Event q support is optional and managed by the kernel,
+ * However, it must set in a shared state so it can't be donated
+ * to the hypervisor later.
+ * This relies on the ARM_SMMU_EVTQ_BASE can't be changed after
+ * de-privilege.
+ */
+static int smmu_init_evtq(struct hyp_arm_smmu_v3_device *smmu)
+{
+	u64 evtq_base, evtq_pfn;
+	size_t evtq_nr_entries, evtq_size, evtq_nr_pages;
+	void *evtq_va, *evtq_end;
+	size_t i;
+	int ret;
+
+	evtq_base = readq_relaxed(smmu->base + ARM_SMMU_EVTQ_BASE);
+	if (!evtq_base)
+		return 0;
+
+	if (evtq_base & ~(Q_BASE_RWA | Q_BASE_ADDR_MASK | Q_BASE_LOG2SIZE))
+		return -EINVAL;
+
+	evtq_nr_entries = 1 << (evtq_base & Q_BASE_LOG2SIZE);
+	evtq_size = evtq_nr_entries * EVTQ_ENT_DWORDS * 8;
+	evtq_nr_pages = PAGE_ALIGN(evtq_size) >> PAGE_SHIFT;
+
+	evtq_pfn = PAGE_ALIGN(evtq_base & Q_BASE_ADDR_MASK) >> PAGE_SHIFT;
+
+	for (i = 0 ; i < evtq_nr_pages ; ++i) {
+		ret = __pkvm_host_share_hyp(evtq_pfn + i);
+		if (ret)
+			return ret;
+	}
+
+	evtq_va = hyp_phys_to_virt(evtq_pfn << PAGE_SHIFT);
+	evtq_end = hyp_phys_to_virt((evtq_pfn + evtq_nr_pages) << PAGE_SHIFT);
+
+	return hyp_pin_shared_mem(evtq_va, evtq_end);
+}
+
 static int smmu_init_strtab(struct hyp_arm_smmu_v3_device *smmu)
 {
 	u64 strtab_base;
@@ -490,7 +533,7 @@ static int smmu_init_strtab(struct hyp_arm_smmu_v3_device *smmu)
 	}
 
 	strtab_base &= STRTAB_BASE_ADDR_MASK;
-	smmu->strtab_base = smmu_take_pages(strtab_base, strtab_size);
+	smmu->strtab_base = smmu_take_pages(strtab_base, PAGE_ALIGN(strtab_size));
 	if (!smmu->strtab_base)
 		return -EINVAL;
 
@@ -738,6 +781,10 @@ static int smmu_init_device(struct hyp_arm_smmu_v3_device *smmu)
 		return ret;
 
 	ret = smmu_init_cmdq(smmu);
+	if (ret)
+		return ret;
+
+	ret = smmu_init_evtq(smmu);
 	if (ret)
 		return ret;
 
@@ -1150,6 +1197,7 @@ static int smmu_detach_dev(struct kvm_hyp_iommu *iommu, struct kvm_hyp_iommu_dom
 	struct hyp_arm_smmu_v3_domain *smmu_domain = domain->priv;
 	u32 pasid_bits = 0;
 	u64 *cd_table, *cd;
+	u32 domain_id, ste_cfg;
 
 	hyp_write_lock(&smmu_domain->lock);
 	kvm_iommu_lock(iommu);
@@ -1157,6 +1205,10 @@ static int smmu_detach_dev(struct kvm_hyp_iommu *iommu, struct kvm_hyp_iommu_dom
 	if (!dst)
 		goto out_unlock;
 
+<<<<<<< ours
+=======
+	ste_cfg = FIELD_GET(STRTAB_STE_0_CFG, dst[0]);
+>>>>>>> theirs
 	/*
 	 * Look at smmu_domain_config_s1 for CD allocation and life time
 	 * For detach stage-1 domains:
@@ -1166,6 +1218,13 @@ static int smmu_detach_dev(struct kvm_hyp_iommu *iommu, struct kvm_hyp_iommu_dom
 	 * - PASID_BITS = 0: invalidate the STE, the cdptr per domain would be free at free_domain()
 	 */
 	if (smmu_domain->type == KVM_ARM_SMMU_DOMAIN_S1) {
+<<<<<<< ours
+=======
+		if (ste_cfg != STRTAB_STE_0_CFG_S1_TRANS) {
+			ret = -EACCES;
+			goto out_unlock;
+		}
+>>>>>>> theirs
 		pasid_bits = FIELD_GET(STRTAB_STE_0_S1CDMAX, dst[0]);
 		if (pasid >= (1 << pasid_bits)) {
 			ret = -E2BIG;
@@ -1186,8 +1245,31 @@ static int smmu_detach_dev(struct kvm_hyp_iommu *iommu, struct kvm_hyp_iommu_dom
 						goto out_unlock;
 					}
 				}
+<<<<<<< ours
 			} else {
 				cd = smmu_get_cd_ptr(cd_table, pasid);
+=======
+				cd = smmu_get_cd_ptr(cd_table, 0);
+				domain_id = FIELD_GET(CTXDESC_CD_0_ASID, cd[0]);
+				if (domain->domain_id != domain_id) {
+					ret = -EACCES;
+					goto out_unlock;
+				}
+			} else {
+				cd = smmu_get_cd_ptr(cd_table, pasid);
+				if (!(cd[0] & CTXDESC_CD_0_V)) {
+					/* The device is not actually attached! */
+					ret = -ENOENT;
+					goto out_unlock;
+				}
+
+				domain_id = FIELD_GET(CTXDESC_CD_0_ASID, cd[0]);
+				if (domain->domain_id != domain_id) {
+					ret = -EACCES;
+					goto out_unlock;
+				}
+
+>>>>>>> theirs
 				cd[0] = 0;
 				smmu_sync_cd(smmu, cd, sid, pasid);
 				cd[1] = 0;
@@ -1197,17 +1279,40 @@ static int smmu_detach_dev(struct kvm_hyp_iommu *iommu, struct kvm_hyp_iommu_dom
 				goto out_skip_ste;
 			}
 		}
+<<<<<<< ours
 	}
 	/* For stage-2 and pasid = 0 */
+=======
+	} else {
+		domain_id = FIELD_GET(STRTAB_STE_2_S2VMID, dst[2]);
+		if ((ste_cfg != STRTAB_STE_0_CFG_S2_TRANS) ||
+		    (domain->domain_id != domain_id)) {
+			ret = -EACCES;
+			goto out_unlock;
+		}
+	}
+	/* For stage-2 and pasid = 0 */
+	if (!(dst[0] & STRTAB_STE_0_V)) {
+		/* The device is not actually attached! */
+		ret = -ENOENT;
+		goto out_unlock;
+	}
+>>>>>>> theirs
 	dst[0] = 0;
 	ret = smmu_sync_ste(smmu, dst, sid);
 	if (ret)
 		goto out_unlock;
 	for (i = 1; i < STRTAB_STE_DWORDS; i++)
 		dst[i] = 0;
+<<<<<<< ours
 
 	ret = smmu_sync_ste(smmu, dst, sid);
 
+=======
+
+	ret = smmu_sync_ste(smmu, dst, sid);
+
+>>>>>>> theirs
 	/* CD table is per SID and not domain for device with PASID. */
 	if (pasid_bits)
 		smmu_free_cd(cd_table, pasid_bits);
@@ -1444,9 +1549,18 @@ static phys_addr_t smmu_iova_to_phys(struct kvm_hyp_iommu_domain *domain,
 static size_t smmu_pgsize_idmap(size_t size, u64 paddr)
 {
 	size_t pgsizes;
-	const size_t pgsize_bitmask = PAGE_SIZE | (PAGE_SIZE * PTRS_PER_PTE) |
-				      (PAGE_SIZE * PTRS_PER_PTE * PTRS_PER_PTE);
+	size_t pgsize_bitmask;
 
+<<<<<<< ours
+=======
+	if (PAGE_SIZE == SZ_4K) {
+		pgsize_bitmask = PAGE_SIZE | (PAGE_SIZE * PTRS_PER_PTE) |
+				 (PAGE_SIZE * PTRS_PER_PTE * PTRS_PER_PTE);
+	} else {
+		pgsize_bitmask = PAGE_SIZE | (PAGE_SIZE * PTRS_PER_PTE);
+	}
+
+>>>>>>> theirs
 	/* All page sizes that fit the size */
 	pgsizes = pgsize_bitmask & GENMASK_ULL(__fls(size), 0);
 

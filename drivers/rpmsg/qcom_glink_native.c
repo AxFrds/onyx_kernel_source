@@ -1661,7 +1661,8 @@ void qcom_glink_native_rx(struct qcom_glink *glink)
 			ret = qcom_glink_rx_open_ack(glink, param1);
 			break;
 		case GLINK_CMD_OPEN:
-			ret = qcom_glink_rx_defer(glink, param2);
+			/* upper 16 bits of param2 are the "prio" field */
+			ret = qcom_glink_rx_defer(glink, param2 & 0xffff);
 			break;
 		case GLINK_CMD_TX_DATA:
 		case GLINK_CMD_TX_DATA_CONT:
@@ -1958,21 +1959,32 @@ static int qcom_glink_request_intent(struct qcom_glink *glink,
 		goto unlock;
 
 	ret = wait_event_timeout(channel->intent_req_wq,
+<<<<<<< ours
 				 (READ_ONCE(channel->intent_req_result) >= 0 &&
 				 READ_ONCE(channel->intent_received)) ||
+=======
+				 READ_ONCE(channel->intent_req_result) == 0 ||
+				 (READ_ONCE(channel->intent_req_result) > 0 &&
+				  READ_ONCE(channel->intent_received)) ||
+>>>>>>> theirs
 				 glink->abort_tx,
 				 10 * HZ);
 	if (!ret) {
 		dev_err(glink->dev, "%s: intent request ack timed out (%d)\n",
 			channel->name, channel->intent_timeout_count);
 		ret = -ETIMEDOUT;
+<<<<<<< ours
 		channel->intent_timeout_count++;
 		if (channel->intent_timeout_count >= MAX_INTENT_TIMEOUTS)
 			GLINK_BUG(glink->ilc,
 				"remoteproc:%s channel:%s unresponsive\n",
 				glink->name, channel->name);
+=======
+	} else if (glink->abort_tx) {
+		ret = -ECANCELED;
+>>>>>>> theirs
 	} else {
-		ret = READ_ONCE(channel->intent_req_result) ? 0 : -ECANCELED;
+		ret = READ_ONCE(channel->intent_req_result) ? 0 : -EAGAIN;
 	}
 
 unlock:
