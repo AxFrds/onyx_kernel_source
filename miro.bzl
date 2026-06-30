@@ -21,7 +21,6 @@ def define_miro():
         _target_in_tree_modules = target_arch_in_tree_modules + xiaomi_common_in_tree_modules + [
             # keep sorted
             "drivers/gpio/gpio-mi-t1.ko",
-            "drivers/power/supply/mca/mca_hardware_ic/wireless_ic/sc96281/sc96281_comp.ko",
             "drivers/media/rc/ir-spi.ko",
             "drivers/power/xm_power/xm_power.ko",
             "drivers/mihw/game/migt.ko",

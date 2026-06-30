@@ -1,11 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0-only
 
-config XIAOMI_RSMC
-	tristate "Xiaomi RSMC X801 driver"
-	depends on PINCTRL_MSM
+config CETC_RSMC
+	tristate "CETC/Xiaomi RSMC X801 driver"
 	default n
 	help
-	  Xiaomi RSMC X801 driver.
-
-	  Keep disabled for generic kernel_aarch64 builds unless the target
-	  device tree and Qualcomm pinctrl provider are available.
+	  CETC/Xiaomi RSMC X801 driver.
