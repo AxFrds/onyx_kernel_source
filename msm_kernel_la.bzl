@@ -167,7 +167,7 @@ def _define_kernel_build(
     kernel_build(
         name = target,
         module_outs = in_tree_module_list,
-        outs = out_list,
+        outs = out_list + [out for out in ["Image", "Image.gz", "Image.lz4"] if out not in out_list],
         build_config = ":{}_build_config".format(target),
         dtstree = dtstree,
         base_kernel = base_kernel,
